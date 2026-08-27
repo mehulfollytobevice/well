@@ -1,0 +1,77 @@
+[project]
+name = "wellground"
+version = "0.1.0"
+description = "Grounded agentic ops Q&A for enhanced geothermal systems (Utah FORGE)"
+readme = "README.md"
+license = { text = "MIT" }
+requires-python = ">=3.11"
+authors = [{ name = "Mehul Jain" }]
+keywords = ["geothermal", "egs", "rag", "langgraph", "agents"]
+dependencies = [
+    "langgraph>=0.2",
+    "langchain-anthropic>=0.3",
+    "langchain-core>=0.3",
+    "anthropic>=0.40",
+    "duckdb>=1.1",
+    "chromadb>=0.5",
+    "rank-bm25>=0.2",
+    "fastapi>=0.115",
+    "uvicorn[standard]>=0.32",
+    "pydantic>=2.9",
+    "pydantic-settings>=2.6",
+    "httpx>=0.27",
+    "python-dotenv>=1.0",
+    "pyyaml>=6.0",
+    "tiktoken>=0.8",
+    "pypdf>=5.0",
+]
+
+[project.optional-dependencies]
+ui = ["streamlit>=1.40"]
+dev = [
+    "pytest>=8.3",
+    "pytest-asyncio>=0.24",
+    "ruff>=0.8",
+    "mypy>=1.13",
+]
+
+[project.scripts]
+wellground = "wellground.cli:main"
+
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[tool.hatch.build.targets.wheel]
+packages = ["src/wellground"]
+
+[tool.hatch.build.targets.sdist]
+include = ["src/wellground", "README.md", "LICENSE"]
+
+[dependency-groups]
+dev = [
+    "pytest>=8.3",
+    "pytest-asyncio>=0.24",
+    "ruff>=0.8",
+    "mypy>=1.13",
+    "streamlit>=1.40",
+]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+asyncio_mode = "auto"
+pythonpath = ["src"]
+
+[tool.ruff]
+line-length = 100
+target-version = "py311"
+src = ["src", "tests"]
+
+[tool.ruff.lint]
+select = ["E", "F", "I", "UP", "B", "SIM"]
+
+[tool.mypy]
+python_version = "3.11"
+strict = true
+packages = ["wellground"]
+mypy_path = "src"

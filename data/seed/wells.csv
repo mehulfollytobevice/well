@@ -1,0 +1,9 @@
+well_id,name,role,md_ft,tvd_ft,lat,lon,notes
+16A,16A(78)-32,injection_well,10987,8559,38.504013,-112.896407,Source: https://utahforge.com/project-data-dashboard/#well-data; Highly deviated injection well; 65° from vertical; stimulated Apr 2022.
+16B,16B(78)-32,production_well,10947,8262,38.504268,-112.896386,Source: https://utahforge.com/project-data-dashboard/#well-data; Production well drilled ~300 ft above and parallel to 16A; stimulated 2024.
+56-32,56-32,seismic_monitoring_well,9145,,38.504024,-112.886492,Source: https://utahforge.com/project-data-dashboard/#well-data; GPS: GDR submission 1358 (Dec 2021)
+68-32,68-32,seismic_monitoring_well,1000,,38.501595,-112.886615,"Source: https://utahforge.com/project-data-dashboard/#well-data; Instrumentation: Seismometer, Accelerometer; GPS: GDR submission 1358 (Dec 2021)"
+58-32,58-32,pilot_well,7536,,38.500516,-112.887012,Source: https://utahforge.com/project-data-dashboard/#well-data; GPS: GDR submission 1358 (Dec 2021)
+58-32-WW,58-32,water_well,1200,,38.500516,-112.887012,Source: https://utahforge.com/project-data-dashboard/#well-data; Co-located with 58-32 pilot pad (approx)
+78-32,78-32,seismic_monitoring_well,3280,,38.500164,-112.883220,Source: https://utahforge.com/project-data-dashboard/#well-data; Instrumentation: DAS; GPS: GDR submission 1358 (Dec 2021)
+78B-32,78B-32,seismic_monitoring_well,9500,,38.500103,-112.882249,Source: https://utahforge.com/project-data-dashboard/#well-data; Instrumentation: DAS; GPS: GDR submission 1358 (Dec 2021)

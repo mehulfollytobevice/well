@@ -1,0 +1,12 @@
+# WellGround semantic catalog — maps domain concepts to tools / SQL.
+#
+# Example (to be filled during data bootstrap):
+# metrics:
+#   production_wh_temp:
+#     description: Production wellhead temperature
+#     unit: degC
+#     sql: |
+#       SELECT avg(temp_c) FROM production_ts
+#       WHERE well_id = :well_id AND ts BETWEEN :start AND :end
+
+metrics: {}
