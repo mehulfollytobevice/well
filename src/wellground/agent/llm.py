@@ -3,7 +3,7 @@
 from __future__ import annotations
 
 import json
-from typing import TypeVar
+from typing import TypeVar, get_origin
 
 from openai import OpenAI
 from pydantic import BaseModel
@@ -31,6 +31,20 @@ def _strip_fences(text: str) -> str:
     return "\n".join(inner).strip()
 
 
+def _coerce_null_collection_fields(payload: dict[str, object], schema: type[BaseModel]) -> dict[str, object]:
+    """LLMs often emit JSON null for empty lists/dicts; Pydantic will not apply defaults."""
+    coerced = dict(payload)
+    for name, field in schema.model_fields.items():
+        if coerced.get(name, "MISSING") is not None:
+            continue
+        origin = get_origin(field.annotation)
+        if origin is list:
+            coerced[name] = []
+        elif origin is dict:
+            coerced[name] = {}
+    return coerced
+
+
 def complete_structured(prompt: str, schema: type[T]) -> T:
     """Ask the model to return JSON matching `schema`."""
     settings = get_settings()
@@ -50,4 +64,7 @@ def complete_structured(prompt: str, schema: type[T]) -> T:
     content = response.choices[0].message.content
     if not content:
         raise RuntimeError("LLM returned an empty response")
-    return schema.model_validate_json(_strip_fences(content))
+    parsed: object = json.loads(_strip_fences(content))
+    if isinstance(parsed, dict):
+        parsed = _coerce_null_collection_fields(parsed, schema)
+    return schema.model_validate(parsed)
