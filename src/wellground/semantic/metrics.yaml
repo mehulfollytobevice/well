@@ -1,12 +1,90 @@
-# WellGround semantic catalog — maps domain concepts to tools / SQL.
-#
-# Example (to be filled during data bootstrap):
-# metrics:
-#   production_wh_temp:
-#     description: Production wellhead temperature
-#     unit: degC
-#     sql: |
-#       SELECT avg(temp_c) FROM production_ts
-#       WHERE well_id = :well_id AND ts BETWEEN :start AND :end
+# WellGround semantic catalog — maps domain concepts to DuckDB SQL.
 
-metrics: {}
+metrics:
+  well_role:
+    description: Role and name of a well (injector, producer, etc.)
+    params: [well_id]
+    source: wells
+    sql: |
+      SELECT well_id, name, role
+      FROM wells
+      WHERE well_id = $well_id
+
+  well_count:
+    description: Total number of wells in the FORGE catalog
+    params: []
+    source: wells
+    sql: |
+      SELECT count(*) AS well_count
+      FROM wells
+
+  list_wells:
+    description: List all wells with id, name, and role
+    params: []
+    source: wells
+    sql: |
+      SELECT well_id, name, role
+      FROM wells
+      ORDER BY well_id
+
+  avg_temperature:
+    description: Average wellhead temperature for a well over a time range
+    params: [well_id, start_ts, end_ts]
+    defaults:
+      start_ts: "2024-08-08"
+      end_ts: "2024-09-05"
+    source: gdr:2475065
+    sql: |
+      SELECT well_id, avg(temperature) AS avg_temperature, count(*) AS n
+      FROM timeseries
+      WHERE well_id = $well_id
+        AND ts BETWEEN CAST($start_ts AS TIMESTAMP) AND CAST($end_ts AS TIMESTAMP)
+        AND temperature IS NOT NULL
+      GROUP BY well_id
+
+  avg_pressure:
+    description: Average wellhead pressure for a well over a time range
+    params: [well_id, start_ts, end_ts]
+    defaults:
+      start_ts: "2024-08-08"
+      end_ts: "2024-09-05"
+    source: gdr:2475065
+    sql: |
+      SELECT well_id, avg(pressure) AS avg_pressure, count(*) AS n
+      FROM timeseries
+      WHERE well_id = $well_id
+        AND ts BETWEEN CAST($start_ts AS TIMESTAMP) AND CAST($end_ts AS TIMESTAMP)
+        AND pressure IS NOT NULL
+      GROUP BY well_id
+
+  avg_flow_rate:
+    description: Average flow rate for a well over a time range (nulls skipped)
+    params: [well_id, start_ts, end_ts]
+    defaults:
+      start_ts: "2024-08-08"
+      end_ts: "2024-09-05"
+    source: gdr:2475065
+    sql: |
+      SELECT well_id, avg(flow_rate) AS avg_flow_rate, count(*) AS n
+      FROM timeseries
+      WHERE well_id = $well_id
+        AND ts BETWEEN CAST($start_ts AS TIMESTAMP) AND CAST($end_ts AS TIMESTAMP)
+        AND flow_rate IS NOT NULL
+      GROUP BY well_id
+
+  timeseries_peak:
+    description: Peak (MAX or MIN) of flow_rate, pressure, or temperature in a range
+    params: [well_id, start_ts, end_ts, column, agg]
+    defaults:
+      start_ts: "2024-08-08"
+      end_ts: "2024-09-05"
+      column: temperature
+      agg: MAX
+    source: gdr:2475065
+    sql: |
+      SELECT well_id, {agg}({column}) AS peak_value, count(*) AS n
+      FROM timeseries
+      WHERE well_id = $well_id
+        AND ts BETWEEN CAST($start_ts AS TIMESTAMP) AND CAST($end_ts AS TIMESTAMP)
+        AND {column} IS NOT NULL
+      GROUP BY well_id

@@ -12,7 +12,10 @@ dependencies = [
     "langchain-anthropic>=0.3",
     "langchain-core>=0.3",
     "anthropic>=0.40",
+    "openai>=1.0",
     "duckdb>=1.1",
+    "pandas>=2.2",
+    "openpyxl>=3.1",
     "chromadb>=0.5",
     "rank-bm25>=0.2",
     "fastapi>=0.115",
@@ -34,6 +37,7 @@ dev = [
     "pytest-asyncio>=0.24",
     "ruff>=0.8",
     "mypy>=1.13",
+    "ipykernel>=6.0",
 ]
 
 [project.scripts]
@@ -56,6 +60,7 @@ dev = [
     "ruff>=0.8",
     "mypy>=1.13",
     "streamlit>=1.40",
+    "ipykernel>=6.0",
 ]
 
 [tool.pytest.ini_options]
