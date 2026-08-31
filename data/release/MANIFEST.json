@@ -1,0 +1,28 @@
+{
+  "promoted_at": "2026-08-31T03:37:53.338797+00:00",
+  "source_dir": "data/processed",
+  "artifacts": [
+    "forge.duckdb",
+    "chroma",
+    "bm25"
+  ],
+  "source_dois": [
+    {
+      "label": "Extended circulation time series",
+      "doi": "10.15121/2475065"
+    },
+    {
+      "label": "Circulation daily reports",
+      "doi": "10.15121/2455019"
+    },
+    {
+      "label": "Injection and production test reports",
+      "doi": "10.15121/2473673"
+    },
+    {
+      "label": "Well GPS metadata",
+      "doi": "10.15121/1838418"
+    }
+  ],
+  "provenance": "data/PROVENANCE.md"
+}

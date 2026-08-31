@@ -110,6 +110,12 @@ Local acquisition date: **2026-08-26**
 ```
 data/
 ├── PROVENANCE.md          ← this file (committed)
+├── release/               ← pinned deploy snapshot (committed)
+│   ├── README.md          ← attribution + license for deployed indexes
+│   ├── MANIFEST.json
+│   ├── forge.duckdb
+│   ├── chroma/
+│   └── bm25/
 ├── seed/
 │   └── wells.csv          ← well metadata (committed)
 └── raw/                   ← gitignored

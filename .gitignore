@@ -56,3 +56,6 @@ logs/
 
 # Jupyter
 .ipynb_checkpoints/
+
+!data/release/
+!data/release/**

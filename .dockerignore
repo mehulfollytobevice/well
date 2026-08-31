@@ -1,0 +1,15 @@
+.venv
+venv
+__pycache__
+.git
+.cursor
+.env
+.env.*
+notebooks
+tests
+data/raw
+data/processed
+ui/node_modules
+ui/.next
+*.md
+!README.md

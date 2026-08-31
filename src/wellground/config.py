@@ -16,6 +16,7 @@ class Settings(BaseSettings):
     )
 
     fireworks_api_key: str = ""
+    ask_api_key: str = ""
     wellground_llm_model: str = "accounts/fireworks/models/gpt-oss-120b"
     wellground_env: str = "development"
     wellground_log_level: str = "INFO"

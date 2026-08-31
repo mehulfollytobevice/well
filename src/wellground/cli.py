@@ -22,8 +22,18 @@ def main(argv: list[str] | None = None) -> None:
         return
 
     if args.command == "serve":
-        print("Serve is not implemented yet. See the roadmap in README.md.", file=sys.stderr)
-        raise SystemExit(1)
+        import os
+
+        import uvicorn
+
+        port = int(os.environ.get("PORT", "8000"))
+        uvicorn.run(
+            "wellground.api.app:app",
+            host="0.0.0.0",
+            port=port,
+            reload=os.environ.get("WELLGROUND_ENV", "development") == "development",
+        )
+        return
 
     parser.print_help()
 

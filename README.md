@@ -107,6 +107,16 @@ Scoped to **Utah FORGE** via the [Geothermal Data Repository (GDR)](https://gdr.
 | **Out of scope (v1)** | DAS / geophone data lakes, multimodal well-log vision                                                                             | Deferred                  |
 
 
+Provenance and licensing: see [`data/PROVENANCE.md`](data/PROVENANCE.md). The **deploy snapshot** committed for Railway lives in [`data/release/`](data/release/) (see [`data/release/README.md`](data/release/README.md)). Local experiments rebuild gitignored `data/processed/`; promote with `uv run python scripts/promote_indexes.py` when ready to ship new indexes.
+
+### Attribution
+
+Primary GDR sources (CC-BY 4.0):
+
+- McLennan, J., England, K., & Swearingen, L. (2024). *Utah FORGE: Wells 16A(78)-32 and 16B(78)-32 Extended Circulation Test Data — August and September 2024*. https://doi.org/10.15121/2475065
+- Swearingen, L. (2024). *Utah FORGE: Wells 16A(78)-32 and 16B(78)-32 Circulation Test Daily Reports from August 2024*. https://doi.org/10.15121/2455019
+- Kolomytsev, L., & Chadwick, C. (2024). *Utah FORGE: Injection and Production Test results and Reports from August 2024*. https://doi.org/10.15121/2473673
+
 Optional breadth later: SMU/NGDS nationwide heat-flow and borehole temperature catalogs on GDR.
 
 ---
@@ -119,12 +129,12 @@ Optional breadth later: SMU/NGDS nationwide heat-flow and borehole temperature c
 | Concern                   | Choice                                                                              |
 | ------------------------- | ----------------------------------------------------------------------------------- |
 | Orchestration             | LangGraph (explicit graph: router → workers → synthesizer)                          |
-| LLM                       | Anthropic Claude (tool use, structured outputs, streaming)                          |
+| LLM                       | Fireworks (OpenAI-compatible structured JSON)                                       |
 | Structured data           | DuckDB + schema/prompt injection (hand-rolled tools + optional SQL)                 |
 | Unstructured RAG          | Embeddings + hybrid search (vector + BM25)                                          |
 | Semantic grounding (lite) | `metrics.yaml` / catalog mapping business concepts → SQL/tools                      |
 | API                       | FastAPI (async)                                                                     |
-| UI                        | Streamlit or lightweight React                                                      |
+| UI                        | Next.js (App Router) + FastAPI                                                      |
 | Eval                      | Golden dataset + automated checks (route, faithfulness, tool-use)                   |
 | Observability             | Structured JSON run logs; optional LangSmith                                        |
 | Packaging                 | Docker; CI with tests                                                               |
@@ -187,7 +197,7 @@ well/
 3. **Graph** — LangGraph router → SQL/RAG → synthesizer
 4. **HITL** — draft “flag well” action + approval gate + audit log
 5. **Evals** — 25–40 golden questions; CI-friendly regression harness
-6. **Serve** — FastAPI + simple UI + Docker
+6. **Serve** — FastAPI + Next.js UI + Docker (Railway)
 7. **Polish** — MCP tool surface; optional Azure deploy
 
 ---
@@ -199,16 +209,73 @@ well/
 Requires [uv](https://docs.astral.sh/uv/) and Python 3.11+.
 
 ```bash
-cp .env.example .env   # set ANTHROPIC_API_KEY=...
+cp .env.example .env   # set FIREWORKS_API_KEY=...
 uv sync                # creates .venv and installs deps (+ editable package)
 uv run wellground version
 uv run pytest
-# later:
-# uv run wellground serve
+uv run wellground serve   # API on :8000
 ```
 
 ---
 
+
+
+
+## Deploy (Railway)
+
+Two services from this repo in one Railway project:
+
+| Service | Dockerfile | Public URL |
+|---|---|---|
+| **api** | repo root `Dockerfile` | private (Railway networking) |
+| **web** | `ui/Dockerfile` | yes — generate domain here |
+
+### api variables
+
+| Variable | Required | Notes |
+|---|---|---|
+| `FIREWORKS_API_KEY` | yes | Fireworks inference only on **api** |
+| `WELLGROUND_LLM_MODEL` | no | default `accounts/fireworks/models/gpt-oss-120b` |
+| `ASK_API_KEY` | recommended | shared secret; web sends `Authorization: Bearer …` |
+| `WELLGROUND_DUCKDB_PATH` | no | defaults to `/app/data/release/forge.duckdb` in image |
+| `WELLGROUND_CHROMA_PATH` | no | defaults to `/app/data/release/chroma` |
+| `WELLGROUND_BM25_PATH` | no | defaults to `/app/data/release/bm25` |
+
+Allocate **≥2 GB RAM** on api (sentence-transformers + Chroma).
+
+### web variables
+
+| Variable | Required | Notes |
+|---|---|---|
+| `API_URL` | yes | e.g. `http://api.railway.internal:8000` |
+| `ASK_API_KEY` | if set on api | same value as api service |
+
+Never put `FIREWORKS_API_KEY` on web. Never use `NEXT_PUBLIC_` for secrets.
+
+### Secrets checklist
+
+- `.env` stays gitignored; set secrets only in Railway Variables
+- Dockerfile does not bake keys or copy `.env`
+- Browser calls Next.js only; Next.js proxies to api over private networking
+- Set Fireworks usage limits/alerts; use separate dev vs prod keys
+
+### Index promotion workflow
+
+```bash
+# rebuild locally, evaluate in notebooks, then:
+uv run python scripts/promote_indexes.py
+git add data/release
+git commit -m "Promote retrieval indexes"
+```
+
+Agent/graph-only changes merge to `main` without re-promoting indexes.
+
+### Local full stack
+
+```bash
+uv run wellground serve          # :8000
+cd ui && cp .env.example .env.local && npm run dev   # :3000
+```
 
 
 ## Disclaimer
