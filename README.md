@@ -75,7 +75,7 @@ User question
 
 | Node              | Responsibility                                                                                           |
 | ----------------- | -------------------------------------------------------------------------------------------------------- |
-| **Router**        | Classifies intent; emits structured route (`sql` | `rag` | `both` | `action`)                            |
+| **Router**        | Classifies intent; emits structured route (`sql`                                                         |
 | **SQL worker**    | Schema-aware queries over wells, time series, and test events; returns rows + the SQL used               |
 | **RAG worker**    | Hybrid retrieval (vector + BM25) over chunked reports; returns passages with doc/page ids                |
 | **Synthesizer**   | Merges evidence; refuses when grounding is weak; always attaches sources                                 |
