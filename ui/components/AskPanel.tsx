@@ -2,6 +2,13 @@
 
 import { useState } from "react";
 import type { AgentResponse } from "@/lib/types";
+import { formatLatency } from "@/lib/format";
+import { EvidenceCard } from "@/components/EvidenceCard";
+
+function sourceRefLabel(sourceId: string, evidenceIndex: Map<string, number>): string {
+  const index = evidenceIndex.get(sourceId);
+  return index !== undefined ? `Source ${index + 1}` : sourceId;
+}
 
 export function AskPanel() {
   const [question, setQuestion] = useState(
@@ -37,68 +44,80 @@ export function AskPanel() {
     }
   }
 
+  const evidenceIndex = new Map(
+    response?.evidence.map((item, index) => [item.evidence_id, index]) ?? [],
+  );
+
   return (
     <section className="panel">
-      <form onSubmit={onSubmit}>
-        <label htmlFor="question">Question</label>
+      <form onSubmit={onSubmit} className="ask-form">
+        <label htmlFor="question" className="form-label">Question</label>
         <textarea
           id="question"
+          className="ask-input"
           value={question}
           onChange={(e) => setQuestion(e.target.value)}
+          placeholder="Ask about wells, stimulation, flow rates…"
         />
-        <button type="submit" disabled={loading || question.trim().length === 0}>
+        <button type="submit" className="ask-button" disabled={loading || question.trim().length === 0}>
           {loading ? "Thinking…" : "Ask WellGround"}
         </button>
       </form>
 
-      {error && <p className="error">{error}</p>}
+      {error && <p className="error-banner">{error}</p>}
 
       {response && (
-        <div>
+        <div className="response">
           <div className="meta">
-            <span className="pill">status: {response.status}</span>
-            <span className="pill">route: {response.route}</span>
-            {latencyMs !== null && <span className="pill">{latencyMs} ms</span>}
+            <span className="pill pill--status">{response.status}</span>
+            <span className="pill pill--route">{response.route}</span>
+            {latencyMs !== null && (
+              <span className="pill pill--time">{formatLatency(latencyMs)}</span>
+            )}
           </div>
 
           {response.refusal_reason && (
-            <p className="error">{response.refusal_reason}</p>
+            <p className="error-banner">{response.refusal_reason}</p>
           )}
 
-          {response.claims.map((claim, index) => (
-            <p key={index} className="claim">
-              {claim.text}
-              {claim.source_ids.length > 0 && (
-                <em> [{claim.source_ids.join(", ")}]</em>
-              )}
-            </p>
-          ))}
+          {response.claims.length > 0 && (
+            <section className="answer-card" aria-label="Answer">
+              <h2 className="answer-card__heading">Answer</h2>
+              <div className="answer-card__body">
+                {response.claims.map((claim, index) => (
+                  <p key={index} className="claim">
+                    {claim.text}
+                    {claim.source_ids.length > 0 && (
+                      <span className="claim-sources">
+                        {claim.source_ids.map((id) => sourceRefLabel(id, evidenceIndex)).join(", ")}
+                      </span>
+                    )}
+                  </p>
+                ))}
+              </div>
+            </section>
+          )}
 
           {response.evidence.length > 0 && (
-            <div className="evidence">
-              <h3>Evidence</h3>
-              {response.evidence.map((item, evidenceIndex) => (
-                <details
-                  key={
-                    item.evidence_id ||
-                    (item.kind === "rag" ? item.chunk_id : item.query_id) ||
-                    String(evidenceIndex)
-                  }>
-                  <summary>
-                    {item.evidence_id} — {item.kind === "rag" ? item.title : item.query_id}
-                  </summary>
-                  {item.kind === "rag" ? (
-                    <p>
-                      Page {item.page} · score {item.score.toFixed(3)}
-                      <br />
-                      {item.excerpt}
-                    </p>
-                  ) : (
-                    <pre>{JSON.stringify(item.rows.slice(0, 5), null, 2)}</pre>
-                  )}
-                </details>
-              ))}
-            </div>
+            <section className="evidence-section" aria-label="Evidence">
+              <h2 className="evidence-section__heading">
+                Supporting evidence
+                <span className="evidence-section__count">{response.evidence.length}</span>
+              </h2>
+              <div className="evidence-list">
+                {response.evidence.map((item, evidenceIndex) => (
+                  <EvidenceCard
+                    key={
+                      item.evidence_id ||
+                      (item.kind === "rag" ? item.chunk_id : item.query_id) ||
+                      String(evidenceIndex)
+                    }
+                    item={item}
+                    index={evidenceIndex}
+                  />
+                ))}
+              </div>
+            </section>
           )}
         </div>
       )}

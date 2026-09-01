@@ -2,8 +2,11 @@
 
 from __future__ import annotations
 
+import logging
 import os
 from typing import Annotated
+
+logger = logging.getLogger(__name__)
 
 from fastapi import Depends, FastAPI, HTTPException, Request, Security
 from fastapi.middleware.cors import CORSMiddleware
@@ -77,9 +80,10 @@ def create_app() -> FastAPI:
         return run_agent(body.question)
 
     @app.exception_handler(Exception)
-    async def unhandled_error(_request: Request, exc: Exception):
+    async def unhandled_error(request: Request, exc: Exception):
         from starlette.responses import JSONResponse
 
+        logger.exception("Unhandled error on %s %s", request.method, request.url.path)
         if os.getenv("WELLGROUND_ENV", "development") == "production":
             return JSONResponse(status_code=500, content={"detail": "Internal server error"})
         raise exc

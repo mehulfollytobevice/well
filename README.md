@@ -4,7 +4,9 @@ A production-shaped reference implementation of **grounded agentic ops Q&A** for
 
 Natural language → route to SQL and/or hybrid RAG → synthesize with citations → optional human-in-the-loop action → evaluated for route accuracy, faithfulness, and tool-use correctness.
 
-> **Status:** Prototype phase. V1 of the RAG is ready. Next phase is Evaluation and UI development 
+> **Status:** Prototype phase. V1 of the RAG is ready. Next phase is Evaluation and UI development.
+>
+> **Live demo:** [https://well-production-813e.up.railway.app/](https://well-production-813e.up.railway.app/)
 
 ---
 
@@ -223,12 +225,14 @@ uv run wellground serve   # API on :8000
 
 ## Deploy (Railway)
 
+Public app: [https://well-production-813e.up.railway.app/](https://well-production-813e.up.railway.app/)
+
 Two services from this repo in one Railway project:
 
 | Service | Dockerfile | Public URL |
 |---|---|---|
 | **api** | repo root `Dockerfile` | private (Railway networking) |
-| **web** | `ui/Dockerfile` | yes — generate domain here |
+| **web** | `ui/Dockerfile` | [well-production-813e.up.railway.app](https://well-production-813e.up.railway.app/) |
 
 ### api variables
 
