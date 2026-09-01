@@ -1,6 +1,6 @@
-# WellGround (ForgeOps Agent)
+# WellGround: Grounded agentic ops Q&A
 
-A production-shaped reference implementation of **grounded agentic ops Q&A** for enhanced geothermal systems (EGS).
+A production-shaped implementation of **grounded agentic ops Q&A** for enhanced geothermal systems (EGS).
 
 Natural language → route to SQL and/or hybrid RAG → synthesize with citations → optional human-in-the-loop action → evaluated for route accuracy, faithfulness, and tool-use correctness.
 
@@ -109,15 +109,15 @@ Scoped to **Utah FORGE** via the [Geothermal Data Repository (GDR)](https://gdr.
 | **Out of scope (v1)** | DAS / geophone data lakes, multimodal well-log vision                                                                             | Deferred                  |
 
 
-Provenance and licensing: see [`data/PROVENANCE.md`](data/PROVENANCE.md). The **deploy snapshot** committed for Railway lives in [`data/release/`](data/release/) (see [`data/release/README.md`](data/release/README.md)). Local experiments rebuild gitignored `data/processed/`; promote with `uv run python scripts/promote_indexes.py` when ready to ship new indexes.
+Provenance and licensing: see `[data/PROVENANCE.md](data/PROVENANCE.md)`. The **deploy snapshot** committed for Railway lives in `[data/release/](data/release/)` (see `[data/release/README.md](data/release/README.md)`). Local experiments rebuild gitignored `data/processed/`; promote with `uv run python scripts/promote_indexes.py` when ready to ship new indexes.
 
 ### Attribution
 
 Primary GDR sources (CC-BY 4.0):
 
-- McLennan, J., England, K., & Swearingen, L. (2024). *Utah FORGE: Wells 16A(78)-32 and 16B(78)-32 Extended Circulation Test Data — August and September 2024*. https://doi.org/10.15121/2475065
-- Swearingen, L. (2024). *Utah FORGE: Wells 16A(78)-32 and 16B(78)-32 Circulation Test Daily Reports from August 2024*. https://doi.org/10.15121/2455019
-- Kolomytsev, L., & Chadwick, C. (2024). *Utah FORGE: Injection and Production Test results and Reports from August 2024*. https://doi.org/10.15121/2473673
+- McLennan, J., England, K., & Swearingen, L. (2024). *Utah FORGE: Wells 16A(78)-32 and 16B(78)-32 Extended Circulation Test Data — August and September 2024*. [https://doi.org/10.15121/2475065](https://doi.org/10.15121/2475065)
+- Swearingen, L. (2024). *Utah FORGE: Wells 16A(78)-32 and 16B(78)-32 Circulation Test Daily Reports from August 2024*. [https://doi.org/10.15121/2455019](https://doi.org/10.15121/2455019)
+- Kolomytsev, L., & Chadwick, C. (2024). *Utah FORGE: Injection and Production Test results and Reports from August 2024*. [https://doi.org/10.15121/2473673](https://doi.org/10.15121/2473673)
 
 Optional breadth later: SMU/NGDS nationwide heat-flow and borehole temperature catalogs on GDR.
 
@@ -222,37 +222,44 @@ uv run wellground serve   # API on :8000
 
 
 
-
 ## Deploy (Railway)
 
 Public app: [https://well-production-813e.up.railway.app/](https://well-production-813e.up.railway.app/)
 
 Two services from this repo in one Railway project:
 
-| Service | Dockerfile | Public URL |
-|---|---|---|
-| **api** | repo root `Dockerfile` | private (Railway networking) |
-| **web** | `ui/Dockerfile` | [well-production-813e.up.railway.app](https://well-production-813e.up.railway.app/) |
+
+| Service | Dockerfile             | Public URL                                                                          |
+| ------- | ---------------------- | ----------------------------------------------------------------------------------- |
+| **api** | repo root `Dockerfile` | private (Railway networking)                                                        |
+| **web** | `ui/Dockerfile`        | [well-production-813e.up.railway.app](https://well-production-813e.up.railway.app/) |
+
+
+
 
 ### api variables
 
-| Variable | Required | Notes |
-|---|---|---|
-| `FIREWORKS_API_KEY` | yes | Fireworks inference only on **api** |
-| `WELLGROUND_LLM_MODEL` | no | default `accounts/fireworks/models/gpt-oss-120b` |
-| `ASK_API_KEY` | recommended | shared secret; web sends `Authorization: Bearer …` |
-| `WELLGROUND_DUCKDB_PATH` | no | defaults to `/app/data/release/forge.duckdb` in image |
-| `WELLGROUND_CHROMA_PATH` | no | defaults to `/app/data/release/chroma` |
-| `WELLGROUND_BM25_PATH` | no | defaults to `/app/data/release/bm25` |
+
+| Variable                 | Required    | Notes                                                 |
+| ------------------------ | ----------- | ----------------------------------------------------- |
+| `FIREWORKS_API_KEY`      | yes         | Fireworks inference only on **api**                   |
+| `WELLGROUND_LLM_MODEL`   | no          | default `accounts/fireworks/models/gpt-oss-120b`      |
+| `ASK_API_KEY`            | recommended | shared secret; web sends `Authorization: Bearer …`    |
+| `WELLGROUND_DUCKDB_PATH` | no          | defaults to `/app/data/release/forge.duckdb` in image |
+| `WELLGROUND_CHROMA_PATH` | no          | defaults to `/app/data/release/chroma`                |
+| `WELLGROUND_BM25_PATH`   | no          | defaults to `/app/data/release/bm25`                  |
+
 
 Allocate **≥2 GB RAM** on api (sentence-transformers + Chroma).
 
 ### web variables
 
-| Variable | Required | Notes |
-|---|---|---|
-| `API_URL` | yes | e.g. `http://api.railway.internal:8000` |
-| `ASK_API_KEY` | if set on api | same value as api service |
+
+| Variable      | Required      | Notes                                   |
+| ------------- | ------------- | --------------------------------------- |
+| `API_URL`     | yes           | e.g. `http://api.railway.internal:8000` |
+| `ASK_API_KEY` | if set on api | same value as api service               |
+
 
 Never put `FIREWORKS_API_KEY` on web. Never use `NEXT_PUBLIC_` for secrets.
 
@@ -262,6 +269,8 @@ Never put `FIREWORKS_API_KEY` on web. Never use `NEXT_PUBLIC_` for secrets.
 - Dockerfile does not bake keys or copy `.env`
 - Browser calls Next.js only; Next.js proxies to api over private networking
 - Set Fireworks usage limits/alerts; use separate dev vs prod keys
+
+
 
 ### Index promotion workflow
 
@@ -280,6 +289,7 @@ Agent/graph-only changes merge to `main` without re-promoting indexes.
 uv run wellground serve          # :8000
 cd ui && cp .env.example .env.local && npm run dev   # :3000
 ```
+
 
 
 ## Disclaimer
