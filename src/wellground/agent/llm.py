@@ -45,7 +45,7 @@ def _coerce_null_collection_fields(payload: dict[str, object], schema: type[Base
     return coerced
 
 
-def complete_structured(prompt: str, schema: type[T]) -> T:
+def complete_structured(prompt: str, schema: type[T], *, system: str | None = None) -> T:
     """Ask the model to return JSON matching `schema`."""
     settings = get_settings()
     schema_json = json.dumps(schema.model_json_schema(), indent=2)
@@ -55,9 +55,13 @@ def complete_structured(prompt: str, schema: type[T]) -> T:
         "Do not include markdown or commentary.\n"
         f"{schema_json}"
     )
+    messages: list[dict[str, str]] = []
+    if system:
+        messages.append({"role": "system", "content": system})
+    messages.append({"role": "user", "content": full_prompt})
     response = _client().chat.completions.create(
         model=settings.wellground_llm_model,
-        messages=[{"role": "user", "content": full_prompt}],
+        messages=messages,
         response_format={"type": "json_object"},
         temperature=0,
     )
