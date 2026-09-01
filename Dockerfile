@@ -22,4 +22,4 @@ ENV WELLGROUND_CHROMA_PATH=/app/data/release/chroma
 ENV WELLGROUND_BM25_PATH=/app/data/release/bm25
 
 EXPOSE 8000
-CMD ["sh", "-c", "uv run uvicorn wellground.api.app:app --host 0.0.0.0 --port ${PORT:-8000}"]
+CMD ["sh", "-c", "uv run uvicorn wellground.api.app:app --host :: --port ${PORT:-8000}"]
