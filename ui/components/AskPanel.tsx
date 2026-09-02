@@ -59,8 +59,25 @@ export function AskPanel() {
           onChange={(e) => setQuestion(e.target.value)}
           placeholder="Ask about wells, stimulation, flow rates…"
         />
-        <button type="submit" className="ask-button" disabled={loading || question.trim().length === 0}>
-          {loading ? "Thinking…" : "Ask WellGround"}
+        <button
+          type="submit"
+          className={`ask-button${loading ? " ask-button--loading" : ""}`}
+          disabled={loading || question.trim().length === 0}
+          aria-busy={loading}
+        >
+          {loading ? (
+            <>
+              <span className="ask-button__spinner" aria-hidden="true" />
+              Thinking
+              <span className="ask-button__dots" aria-hidden="true">
+                <span>.</span>
+                <span>.</span>
+                <span>.</span>
+              </span>
+            </>
+          ) : (
+            "Ask WellGround"
+          )}
         </button>
       </form>
 
