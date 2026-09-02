@@ -30,7 +30,7 @@ def _rag_hit() -> RagEvidence:
 
 
 def test_rag_route_cites_evidence_ids(monkeypatch: Any) -> None:
-    def fake_complete(prompt: str, schema: type[BaseModel]) -> BaseModel:
+    def fake_complete(prompt: str, schema: type[BaseModel], **_kwargs: Any) -> BaseModel:
         if schema is RouteDecision:
             return RouteDecision(
                 route="rag",
@@ -72,7 +72,7 @@ def test_rag_route_cites_evidence_ids(monkeypatch: Any) -> None:
 
 
 def test_action_route_refuses(monkeypatch: Any) -> None:
-    def fake_complete(prompt: str, schema: type[BaseModel]) -> BaseModel:
+    def fake_complete(prompt: str, schema: type[BaseModel], **_kwargs: Any) -> BaseModel:
         if schema is RouteDecision:
             return RouteDecision(route="action", rationale="flag a well")
         raise AssertionError(f"unexpected schema {schema}")
@@ -92,7 +92,7 @@ def test_action_route_refuses(monkeypatch: Any) -> None:
 
 
 def test_sql_route_uses_metric(monkeypatch: Any) -> None:
-    def fake_complete(prompt: str, schema: type[BaseModel]) -> BaseModel:
+    def fake_complete(prompt: str, schema: type[BaseModel], **_kwargs: Any) -> BaseModel:
         if schema is RouteDecision:
             return RouteDecision(
                 route="sql",
@@ -135,7 +135,7 @@ def test_sql_route_uses_metric(monkeypatch: Any) -> None:
 
 
 def test_both_route_merges_sql_and_rag(monkeypatch: Any) -> None:
-    def fake_complete(prompt: str, schema: type[BaseModel]) -> BaseModel:
+    def fake_complete(prompt: str, schema: type[BaseModel], **_kwargs: Any) -> BaseModel:
         if schema is RouteDecision:
             return RouteDecision(
                 route="both",

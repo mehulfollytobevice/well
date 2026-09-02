@@ -67,6 +67,9 @@ dev = [
 testpaths = ["tests"]
 asyncio_mode = "auto"
 pythonpath = ["src"]
+markers = [
+    "live: calls Fireworks; skipped when FIREWORKS_API_KEY is unset",
+]
 
 [tool.ruff]
 line-length = 100

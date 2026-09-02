@@ -174,7 +174,7 @@ well/
 ├── LICENSE
 ├── data/                 # raw downloads + processed DuckDB / embeddings (gitignored bulky files)
 ├── docs/                 # architecture notes, data provenance
-├── evals/                # golden questions, expected routes, graders
+├── evals/                # golden.jsonl, verifier cases, Layer A README
 ├── src/
 │   ├── agent/            # LangGraph graph, nodes, state
 │   ├── tools/            # SQL, RAG, action tools
@@ -198,7 +198,7 @@ well/
 2. **Tools** — `run_sql` / curated metric tools + hybrid `search_docs`
 3. **Graph** — LangGraph router → SQL/RAG → synthesizer
 4. **HITL** — draft “flag well” action + approval gate + audit log
-5. **Evals** — 25–40 golden questions; CI-friendly regression harness
+5. **Evals** — Layer A component gold set (~30 questions) + CI harness; Layer B traces next
 6. **Serve** — FastAPI + Next.js UI + Docker (Railway)
 7. **Polish** — MCP tool surface; optional Azure deploy
 
@@ -214,9 +214,26 @@ Requires [uv](https://docs.astral.sh/uv/) and Python 3.11+.
 cp .env.example .env   # set FIREWORKS_API_KEY=...
 uv sync                # creates .venv and installs deps (+ editable package)
 uv run wellground version
-uv run pytest
+uv run pytest tests/ -m "not live"   # unit + Layer A SQL/RAG/verifier (no Fireworks)
+uv run pytest tests/                 # also runs live router/SQL-planner evals if the key is set
 uv run wellground serve   # API on :8000
 ```
+
+Layer A evals (gold set, bootstrap, graders): see [`evals/README.md`](evals/README.md).
+
+---
+
+## CI
+
+GitHub Actions ([`.github/workflows/ci.yml`](.github/workflows/ci.yml)) runs `uv run pytest tests/` against the pinned [`data/release/`](data/release/) indexes.
+
+- Add `FIREWORKS_API_KEY` under **Settings → Secrets and variables → Actions → Secrets** (not Variables — secrets are masked in logs).
+- Use a **dedicated CI Fireworks key** with usage limits, separate from local `.env` and Railway production.
+- Live router/SQL-planner tests **skip** if the secret is missing; they never print the key.
+- The workflow does **not** run on fork pull requests, so the secret is not available to untrusted PRs.
+- Do not add `printenv` / `env` debug steps while secrets are loaded.
+
+If a key is exposed: revoke it in Fireworks, create a new key, update GitHub Secrets (and `.env` / Railway as needed), then re-run CI.
 
 ---
 
@@ -265,10 +282,11 @@ Never put `FIREWORKS_API_KEY` on web. Never use `NEXT_PUBLIC_` for secrets.
 
 ### Secrets checklist
 
-- `.env` stays gitignored; set secrets only in Railway Variables
+- `.env` stays gitignored; set secrets only in Railway Variables and GitHub Actions Secrets
 - Dockerfile does not bake keys or copy `.env`
 - Browser calls Next.js only; Next.js proxies to api over private networking
-- Set Fireworks usage limits/alerts; use separate dev vs prod keys
+- Set Fireworks usage limits/alerts; use separate keys for local, CI, and Railway
+- Never put `FIREWORKS_API_KEY` in eval JSONL, pytest output, or workflow logs
 
 
 
