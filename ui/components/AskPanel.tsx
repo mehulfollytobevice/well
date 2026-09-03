@@ -12,7 +12,7 @@ function sourceRefLabel(sourceId: string, evidenceIndex: Map<string, number>): s
 
 export function AskPanel() {
   const [question, setQuestion] = useState(
-    "Summarize how 16A was stimulated and what peak flow was reported.",
+    "What pump rate was used for Step 7 of the 16A circulation test?",
   );
   const [response, setResponse] = useState<AgentResponse | null>(null);
   const [error, setError] = useState<string | null>(null);

@@ -168,7 +168,7 @@ Oct 2024           Data published to GDR
 |---|---|---|
 | "Average production wellhead temperature for 16B during the last week of the test" | SQL | Time series XLSX → DuckDB |
 | "Which well is the injector?" | SQL | `wells.csv` |
-| "Summarize how 16A was stimulated" | RAG | inj_prod PDFs, daily reports |
+| "What pump rate was used for Step 7 of the 16A circulation test?" | RAG | daily reports |
 | "What rig activity happened on Aug 12?" | RAG | Daily report PDF for that date |
 | "Compare injection vs production temps and cite the test procedure" | SQL + RAG | Time series + final report DOCX |
 | "Where does injection enter the 16A wellbore?" | RAG | 16A injection profile PDF/XLSX |

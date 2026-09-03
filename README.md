@@ -38,7 +38,7 @@ Domain context is **Utah FORGE** (DOE’s public EGS research site) — the same
 | Question                                                                                                       | Expected route    |
 | -------------------------------------------------------------------------------------------------------------- | ----------------- |
 | “What’s the average production wellhead temperature for 16B during the Aug–Sep 2024 circulation test?”         | SQL               |
-| “Summarize how 16A was stimulated and what peak flow was reported.”                                            | RAG               |
+| “What pump rate was used for Step 7 of the 16A circulation test?”                                              | RAG               |
 | “Compare injection vs production temps for 16A/16B last week of the test, and cite the test report procedure.” | SQL + RAG         |
 | “Flag 16B for inspection if outlet temperature dropped more than 5% week-over-week.”                           | SQL → HITL action |
 
