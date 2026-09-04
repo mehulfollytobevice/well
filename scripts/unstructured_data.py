@@ -1,5 +1,9 @@
 #!/usr/bin/env python3
-"""Parse Utah FORGE PDF reports into page-level text records."""
+"""Parse Utah FORGE PDF reports into layout-aware page records.
+
+Writes ``data/processed/pdf_pages.jsonl`` with markdown headings (``##``) and
+tables. Re-run this after parser changes, then ``scripts/build_index.py``.
+"""
 
 from __future__ import annotations
 

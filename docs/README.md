@@ -114,6 +114,8 @@ Each daily report typically covers: rig activity, pumping, water temperature, de
 
 Use these for **qualitative** questions ("what happened that day?", "summarize the first week"). Use the time series XLSX for **numeric** questions ("average temperature on Aug 25").
 
+PDF text is parsed with **pdfplumber** (section headings as `##`, tables as markdown) by `scripts/unstructured_data.py`, then split into section chunks by `scripts/build_index.py`. After changing the parser or chunker, rebuild `data/processed/` (do not expect CI `data/release/` indexes to update until `scripts/promote_indexes.py`). RAG evals match `doc_id` + page, not `chunk_id`.
+
 ---
 
 ## Downhole surveys (`data/raw/pdfs/inj_prod/`)

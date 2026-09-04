@@ -16,6 +16,7 @@ def _chunk(
     page: int = 1,
     text: str = "Report No. 10 covers wellhead pressure during circulation.",
     well_ids: list[str] | None = None,
+    section: str = "",
 ) -> Chunk:
     if well_ids is None:
         well_ids = ["16A"]
@@ -27,6 +28,7 @@ def _chunk(
         text=text,
         well_ids=well_ids,
         token_count=10,
+        section=section,
     )
 
 
@@ -88,7 +90,7 @@ def test_search_uses_title_and_well_ids() -> None:
 
 
 def test_save_and_load_round_trip(tmp_path: Path) -> None:
-    chunks = [_chunk()]
+    chunks = [_chunk(section="Operations Summary")]
     original = BM25Index.build(chunks)
     original.save(tmp_path)
 
@@ -96,6 +98,7 @@ def test_save_and_load_round_trip(tmp_path: Path) -> None:
     hits = loaded.search("Report No. 10 circulation", top_k=1)
 
     assert len(loaded.chunks) == 1
+    assert loaded.chunks[0].section == "Operations Summary"
     assert hits
     assert isinstance(hits[0], SearchHit)
     assert hits[0].chunk.chunk_id == chunks[0].chunk_id

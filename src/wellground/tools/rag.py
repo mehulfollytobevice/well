@@ -2,6 +2,8 @@
 
 from __future__ import annotations
 
+import re
+
 from wellground.agent.schemas import RagEvidence
 from wellground.config import get_settings
 from wellground.retrieval.hybrid import HybridHit, HybridRetriever
@@ -42,11 +44,14 @@ def hit_to_evidence(hit: HybridHit) -> RagEvidence:
         excerpt=_excerpt(chunk.text),
         well_ids=list(chunk.well_ids),
         score=hit.score,
+        section=chunk.section,
     )
 
 
 def _excerpt(text: str, limit: int = EXCERPT_CHARS) -> str:
-    collapsed = " ".join(text.split())
+    """Truncate for the LLM while keeping markdown table line breaks."""
+    collapsed = re.sub(r"[ \t]+", " ", text)
+    collapsed = re.sub(r"\n{3,}", "\n\n", collapsed).strip()
     if len(collapsed) <= limit:
         return collapsed
-    return collapsed[: limit - 3] + "..."
+    return collapsed[: limit - 3].rstrip() + "..."

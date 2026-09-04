@@ -8,11 +8,13 @@ from pathlib import Path
 import tiktoken
 
 from wellground.retrieval.chunker import (
+    Chunk,
     chunk_page,
     chunk_pages,
     count_tokens,
     load_pages_jsonl,
     make_chunk_id,
+    split_sections,
     write_chunks_jsonl,
 )
 from wellground.retrieval.pdf_parser import PdfPage
@@ -24,6 +26,29 @@ PAGES_JSONL = PROJECT_ROOT / "data/processed/pdf_pages.jsonl"
 def test_make_chunk_id() -> None:
     assert make_chunk_id("daily_reports/report", 1, 0) == "daily_reports/report#p001#c00"
     assert make_chunk_id("daily_reports/report", 12, 3) == "daily_reports/report#p012#c03"
+
+
+def test_chunk_from_mapping_defaults_missing_section() -> None:
+    chunk = Chunk.from_mapping(
+        {
+            "chunk_id": "doc#p001#c00",
+            "doc_id": "doc",
+            "title": "Title",
+            "page": 1,
+            "text": "plain",
+            "well_ids": ["16A"],
+            "token_count": 4,
+        }
+    )
+    assert chunk.section == ""
+    assert chunk.well_ids == ["16A"]
+
+
+def test_split_sections_reads_markdown_headings() -> None:
+    sections = split_sections(
+        "## Current Operations\nPumping.\n\n## Safety Summary\nNo incidents."
+    )
+    assert [name for name, _body in sections] == ["Current Operations", "Safety Summary"]
 
 
 def test_short_page_becomes_single_chunk() -> None:
@@ -39,18 +64,39 @@ def test_short_page_becomes_single_chunk() -> None:
 
     assert len(chunks) == 1
     assert chunks[0].well_ids == ["16A"]
-    assert chunks[0].token_count == count_tokens(page.text)
+    assert chunks[0].section == "Body"
+    assert chunks[0].text.startswith("## Body")
+    assert chunks[0].token_count == count_tokens(chunks[0].text)
     assert chunks[0].chunk_id == "test/doc#p001#c00"
 
 
-def test_long_page_splits_with_overlap() -> None:
+def test_two_sections_become_two_chunks() -> None:
+    page = PdfPage(
+        doc_id="test/doc",
+        title="Test",
+        page=1,
+        text="## Current Operations\nPumping at 10 bpm.\n\n## Safety Summary\nNo incidents.",
+        source_path="/tmp/test.pdf",
+        well_ids=["16A"],
+    )
+    chunks = chunk_page(page, max_tokens=600)
+
+    assert len(chunks) == 2
+    assert [chunk.section for chunk in chunks] == ["Current Operations", "Safety Summary"]
+    assert chunks[0].text.startswith("## Current Operations")
+    assert "10 bpm" in chunks[0].text
+    assert "No incidents" in chunks[1].text
+    assert chunks[0].chunk_id != chunks[1].chunk_id
+
+
+def test_long_section_splits_with_overlap() -> None:
     enc = tiktoken.get_encoding("cl100k_base")
     long_text = enc.decode(list(range(2000)))
     page = PdfPage(
         doc_id="test/doc",
         title="Test",
         page=2,
-        text=long_text,
+        text=f"## Operations Summary\n{long_text}",
         source_path="/tmp/test.pdf",
         well_ids=[],
     )
@@ -59,6 +105,8 @@ def test_long_page_splits_with_overlap() -> None:
 
     assert len(chunks) >= 3
     assert all(chunk.token_count <= 600 for chunk in chunks)
+    assert all(chunk.section == "Operations Summary" for chunk in chunks)
+    assert all(chunk.text.startswith("## Operations Summary") for chunk in chunks)
     assert chunks[0].chunk_id != chunks[1].chunk_id
 
 
@@ -79,7 +127,7 @@ def test_write_and_load_chunks_jsonl(tmp_path: Path) -> None:
         doc_id="test/doc",
         title="Test",
         page=1,
-        text="Sample chunk text.",
+        text="## Body\nSample chunk text.",
         source_path="/tmp/test.pdf",
         well_ids=["16B"],
     )
@@ -88,8 +136,9 @@ def test_write_and_load_chunks_jsonl(tmp_path: Path) -> None:
     write_chunks_jsonl(chunks, output)
 
     saved = json.loads(output.read_text(encoding="utf-8").strip())
-    assert saved["text"] == "Sample chunk text."
+    assert "Sample chunk text." in saved["text"]
     assert saved["well_ids"] == ["16B"]
+    assert saved["section"] == "Body"
 
 
 def test_chunk_pages_round_trip(tmp_path: Path) -> None:

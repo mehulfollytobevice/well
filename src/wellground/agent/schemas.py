@@ -28,6 +28,7 @@ class RagEvidence(BaseModel):
     excerpt: str
     well_ids: list[str]
     score: float
+    section: str = ""
 
 
 Evidence = SqlEvidence | RagEvidence

@@ -2,7 +2,7 @@
 
 This folder is the **pinned production corpus** baked into the Railway API Docker image. It is a derived work of public Utah FORGE / DOE Geothermal Data Repository (GDR) datasets.
 
-Local experiments use gitignored `data/processed/`. Run `uv run python scripts/promote_indexes.py` after rebuilding indexes to refresh this snapshot.
+Local experiments use gitignored `data/processed/`. Rebuild with `uv run python scripts/unstructured_data.py` then `uv run python scripts/build_index.py`, then `uv run python scripts/promote_indexes.py` when ready to refresh this snapshot. Parser/chunker changes do not update these files until you promote.
 
 ## Artifacts
 

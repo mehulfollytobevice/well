@@ -114,8 +114,9 @@ def _format_evidence(evidence: list[Evidence]) -> str:
             )
         elif isinstance(item, RagEvidence):
             wells = ",".join(item.well_ids) or "none"
+            section = item.section or "none"
             blocks.append(
                 f"[{item.evidence_id}] RAG {item.title} p.{item.page} "
-                f"chunk={item.chunk_id} wells={wells}\n{item.excerpt}"
+                f"chunk={item.chunk_id} section={section} wells={wells}\n{item.excerpt}"
             )
     return "\n\n".join(blocks)

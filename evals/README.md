@@ -28,6 +28,8 @@ Each `golden.jsonl` line is a `GoldCase`:
 
 RAG gold is **`doc_id` + `page`**, not `chunk_id`, so evals survive re-chunking until the underlying PDF pages change. Tie failures to [`data/release/MANIFEST.json`](../data/release/MANIFEST.json) if you just promoted indexes.
 
+PDF ingestion writes layout-aware page markdown (`##` sections and tables) via `scripts/unstructured_data.py`, then `scripts/build_index.py` chunks by section. Rebuild `data/processed/` after parser/chunker changes. Layer A RAG tests in CI still load **pinned** [`data/release/`](../data/release/) indexes until you promote.
+
 ## Workflow
 
 ```bash

@@ -1,5 +1,12 @@
 #!/usr/bin/env python3
-"""Build retrieval indexes from parsed PDF pages (BM25 + dense Chroma)."""
+"""Build retrieval indexes from parsed PDF pages (BM25 + dense Chroma).
+
+Pages come from ``scripts/unstructured_data.py`` (section markdown). Chunking
+splits on ``##`` headings, then token-windows long sections. After parser or
+chunker changes, re-run parse + this script into ``data/processed/``. RAG evals
+key gold by ``doc_id`` + page, not ``chunk_id``. Promote with
+``scripts/promote_indexes.py`` only when shipping a new ``data/release/`` snapshot.
+"""
 
 from __future__ import annotations
 

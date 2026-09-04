@@ -38,8 +38,10 @@ def tokenize(text: str) -> list[str]:
 
 
 def chunk_index_text(chunk: Chunk) -> str:
-    """Text passed to BM25 — title and well tags help keyword lookup."""
+    """Text passed to BM25 — title, section, and well tags help keyword lookup."""
     parts = [chunk.title]
+    if chunk.section:
+        parts.append(chunk.section)
     if chunk.well_ids:
         parts.append(" ".join(chunk.well_ids))
     parts.append(chunk.text)
@@ -105,6 +107,7 @@ class BM25Index:
                             "text": chunk.text,
                             "well_ids": chunk.well_ids,
                             "token_count": chunk.token_count,
+                            "section": chunk.section,
                         },
                         ensure_ascii=False,
                     )
@@ -135,7 +138,7 @@ class BM25Index:
         with chunks_path.open(encoding="utf-8") as handle:
             for line in handle:
                 row = json.loads(line)
-                chunks.append(Chunk(**row))
+                chunks.append(Chunk.from_mapping(row))
 
         with index_path.open("rb") as handle:
             payload = pickle.load(handle)

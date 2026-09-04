@@ -31,20 +31,22 @@ def _chunk_metadata(chunk: Chunk) -> dict[str, str | int]:
         "text": chunk.text,
         "well_ids": ",".join(chunk.well_ids),
         "token_count": chunk.token_count,
+        "section": chunk.section,
     }
 
 
 def _chunk_from_metadata(chunk_id: str, metadata: dict[str, Any]) -> Chunk:
-    well_ids_raw = metadata.get("well_ids", "")
-    well_ids = [part for part in str(well_ids_raw).split(",") if part]
-    return Chunk(
-        chunk_id=chunk_id,
-        doc_id=str(metadata["doc_id"]),
-        title=str(metadata["title"]),
-        page=int(metadata["page"]),
-        text=str(metadata["text"]),
-        well_ids=well_ids,
-        token_count=int(metadata["token_count"]),
+    return Chunk.from_mapping(
+        {
+            "chunk_id": chunk_id,
+            "doc_id": metadata["doc_id"],
+            "title": metadata["title"],
+            "page": metadata["page"],
+            "text": metadata["text"],
+            "well_ids": metadata.get("well_ids", ""),
+            "token_count": metadata.get("token_count") or 0,
+            "section": metadata.get("section") or "",
+        }
     )
 
 

@@ -19,13 +19,17 @@ Well ids look like 16A, 16B, 58-32. Circulation test dates: 2024-08-08 to 2024-0
 16A is the injector; 16B is the producer.
 There is no field column — 16A/16B are well_id values. For "how many wells", use well_count.
 
+If the question also asks to cite a daily report, procedure, or Step N pump rate, ignore that
+part — RAG handles documents. Plan only the numeric/catalog lookup (for example avg_temperature
+for 16B wellhead temperature). Do not SELECT wells.notes or invent report text in SQL.
+
 Catalog:
 {catalog}
 
 Question: {question}
 SQL subquery: {subquery}
 
-If mode=metric, set metric_id and params (string values).
+If mode=metric, set metric_id and params (string values). Extra date params are optional.
 If mode=sql, set a single SELECT over tables wells and/or timeseries using only listed columns.
 """
 

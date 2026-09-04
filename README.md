@@ -109,7 +109,7 @@ Scoped to **Utah FORGE** via the [Geothermal Data Repository (GDR)](https://gdr.
 | **Out of scope (v1)** | DAS / geophone data lakes, multimodal well-log vision                                                                             | Deferred                  |
 
 
-Provenance and licensing: see `[data/PROVENANCE.md](data/PROVENANCE.md)`. The **deploy snapshot** committed for Railway lives in `[data/release/](data/release/)` (see `[data/release/README.md](data/release/README.md)`). Local experiments rebuild gitignored `data/processed/`; promote with `uv run python scripts/promote_indexes.py` when ready to ship new indexes.
+Provenance and licensing: see `[data/PROVENANCE.md](data/PROVENANCE.md)`. The **deploy snapshot** committed for Railway lives in `[data/release/](data/release/)` (see `[data/release/README.md](data/release/README.md)`). Local experiments rebuild gitignored `data/processed/` with `uv run python scripts/unstructured_data.py` then `uv run python scripts/build_index.py`; promote with `uv run python scripts/promote_indexes.py` when ready to ship new indexes.
 
 ### Attribution
 
