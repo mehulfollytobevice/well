@@ -4,7 +4,7 @@ from __future__ import annotations
 
 from typing import Literal
 
-from pydantic import BaseModel, Field
+from pydantic import AliasChoices, BaseModel, Field
 
 
 class SqlEvidence(BaseModel):
@@ -49,7 +49,7 @@ class SqlPlan(BaseModel):
 
 
 class Claim(BaseModel):
-    text: str
+    text: str = Field(validation_alias=AliasChoices("text", "claim"))
     source_ids: list[str]
 
 

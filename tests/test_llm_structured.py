@@ -3,7 +3,7 @@
 from __future__ import annotations
 
 from wellground.agent.llm import _normalize_structured_payload
-from wellground.agent.schemas import RouteDecision, SqlPlan
+from wellground.agent.schemas import RouteDecision, SqlPlan, SynthesisResult
 
 
 def test_unwraps_name_value_schema_echo() -> None:
@@ -42,3 +42,18 @@ def test_parses_stringified_params_object() -> None:
     out = _normalize_structured_payload(payload, SqlPlan)
     assert out["params"] == {"well_id": "16B"}
     SqlPlan.model_validate(out)
+
+
+def test_synthesis_accepts_claim_instead_of_text() -> None:
+    payload = {
+        "status": "answered",
+        "claims": [
+            {
+                "claim": "Step 7 of the 16A circulation test was pumped at 10.0 bpm.",
+                "source_ids": ["E4", "E6"],
+            }
+        ],
+        "refusal_reason": None,
+    }
+    result = SynthesisResult.model_validate(payload)
+    assert result.claims[0].text.startswith("Step 7")
