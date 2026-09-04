@@ -24,6 +24,7 @@ export type RagEvidence = {
   excerpt: string;
   well_ids: string[];
   score: number;
+  section?: string;
 };
 
 export type AgentResponse = {

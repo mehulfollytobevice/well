@@ -19,7 +19,7 @@ class HybridHit:
 
     chunk_id: str
     chunk: Chunk
-    score: float
+    score: float  # cosine similarity in [~-1, 1], used as UI relevance
     rank: int
     bm25_rank: int | None
     dense_rank: int | None
@@ -82,8 +82,12 @@ class HybridRetriever:
             k=self.rrf_k,
         )
 
+        dense_scores = {hit.chunk.chunk_id: hit.score for hit in dense_hits}
+        fused_ids = [chunk_id for chunk_id, _rrf in fused[:top_k]]
+        cosine_by_id = self.dense.cosine_scores(query, fused_ids)
+
         hits: list[HybridHit] = []
-        for rank, (chunk_id, score) in enumerate(fused[:top_k], start=1):
+        for rank, (chunk_id, _rrf_score) in enumerate(fused[:top_k], start=1):
             chunk = chunk_by_id.get(chunk_id) or self._chunks_by_id.get(chunk_id)
             if chunk is None:
                 continue
@@ -91,7 +95,7 @@ class HybridRetriever:
                 HybridHit(
                     chunk_id=chunk_id,
                     chunk=chunk,
-                    score=score,
+                    score=cosine_by_id.get(chunk_id, dense_scores.get(chunk_id, 0.0)),
                     rank=rank,
                     bm25_rank=bm25_ranks.get(chunk_id),
                     dense_rank=dense_ranks.get(chunk_id),

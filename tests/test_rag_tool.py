@@ -66,3 +66,29 @@ def test_hit_to_evidence_preserves_section_and_table_newlines() -> None:
     assert evidence.section == "Operations Summary"
     assert "\n" in evidence.excerpt
     assert "| 6:00 | RIGU |" in evidence.excerpt
+
+
+def test_hit_to_evidence_keeps_long_markdown_excerpt() -> None:
+    body = "## Interpretation Remarks\n\n" + ("station pass notes. " * 80)
+    chunk = Chunk(
+        chunk_id="daily_reports/extracted/rpt#p004#c00",
+        doc_id="daily_reports/extracted/rpt",
+        title="Production log",
+        page=4,
+        text=body,
+        well_ids=["16B"],
+        token_count=200,
+        section="Interpretation Remarks",
+    )
+    hit = HybridHit(
+        chunk_id=chunk.chunk_id,
+        chunk=chunk,
+        score=0.9,
+        rank=1,
+        bm25_rank=1,
+        dense_rank=1,
+    )
+    evidence = hit_to_evidence(hit)
+    assert evidence.excerpt.startswith("## Interpretation Remarks")
+    assert "..." not in evidence.excerpt
+    assert len(evidence.excerpt) > 500

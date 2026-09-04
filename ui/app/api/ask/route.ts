@@ -16,15 +16,22 @@ export async function POST(request: NextRequest) {
     headers.Authorization = `Bearer ${ASK_API_KEY}`;
   }
 
+  const upstreamUrl = `${API_URL}/api/ask`;
   try {
-    const upstream = await fetch(`${API_URL}/api/ask`, {
+    const upstream = await fetch(upstreamUrl, {
       method: "POST",
       headers,
       body: JSON.stringify(body),
     });
     const data = await upstream.json();
     return NextResponse.json(data, { status: upstream.status });
-  } catch {
-    return NextResponse.json({ detail: "Upstream API unavailable" }, { status: 502 });
+  } catch (err) {
+    const reason = err instanceof Error ? err.message : "fetch failed";
+    return NextResponse.json(
+      {
+        detail: `Upstream API unavailable at ${upstreamUrl} (${reason}). Start FastAPI on port 8000, or set API_URL.`,
+      },
+      { status: 502 },
+    );
   }
 }

@@ -1,5 +1,8 @@
+"use client";
+
 import type { RagEvidence, SqlEvidence } from "@/lib/types";
 import { formatScore } from "@/lib/format";
+import { MarkdownExcerpt } from "@/components/MarkdownExcerpt";
 
 type EvidenceCardProps = {
   item: SqlEvidence | RagEvidence;
@@ -56,8 +59,14 @@ export function EvidenceCard({ item, index }: EvidenceCardProps) {
                 <span className="evidence-meta__value">{item.well_ids.join(", ")}</span>
               </span>
             )}
+            {item.section && (
+              <span className="evidence-meta__item">
+                <span className="evidence-meta__label">Section</span>
+                <span className="evidence-meta__value">{item.section}</span>
+              </span>
+            )}
           </div>
-          <blockquote className="evidence-excerpt">{item.excerpt}</blockquote>
+          <MarkdownExcerpt markdown={item.excerpt} />
         </div>
       </details>
     );

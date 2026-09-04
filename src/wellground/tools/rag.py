@@ -8,7 +8,8 @@ from wellground.agent.schemas import RagEvidence
 from wellground.config import get_settings
 from wellground.retrieval.hybrid import HybridHit, HybridRetriever
 
-EXCERPT_CHARS = 500
+# Keep section-sized chunks intact so markdown headings/tables survive into the UI.
+EXCERPT_CHARS = 4000
 
 _retriever: HybridRetriever | None = None
 

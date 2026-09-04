@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import type { AgentResponse } from "@/lib/types";
-import { formatLatency } from "@/lib/format";
+import { formatEvidenceCount, formatLatency, sourceOriginLabel } from "@/lib/format";
 import { EvidenceCard } from "@/components/EvidenceCard";
 
 function sourceRefLabel(sourceId: string, evidenceIndex: Map<string, number>): string {
@@ -47,6 +47,7 @@ export function AskPanel() {
   const evidenceIndex = new Map(
     response?.evidence.map((item, index) => [item.evidence_id, index]) ?? [],
   );
+  const evidenceKinds = new Set(response?.evidence.map((item) => item.kind) ?? []);
 
   return (
     <section className="panel">
@@ -85,13 +86,44 @@ export function AskPanel() {
 
       {response && (
         <div className="response">
-          <div className="meta">
-            <span className="pill pill--status">{response.status}</span>
-            <span className="pill pill--route">{response.route}</span>
-            {latencyMs !== null && (
-              <span className="pill pill--time">{formatLatency(latencyMs)}</span>
+          <dl className="meta">
+            {response.status !== "answered" && (
+              <div className={`meta-item meta-item--${response.status}`}>
+                <dt className="meta-item__label">Outcome</dt>
+                <dd className="meta-item__value">
+                  {response.status === "needs_clarification"
+                    ? "Needs more detail"
+                    : "Could not answer"}
+                </dd>
+              </div>
             )}
-          </div>
+            <div className="meta-item">
+              <dt className="meta-item__label">Looked in</dt>
+              <dd className="meta-item__value">
+                {sourceOriginLabel(response.route, evidenceKinds)}
+              </dd>
+            </div>
+            <div className="meta-item">
+              <dt className="meta-item__label">Based on</dt>
+              <dd className="meta-item__value">
+                {formatEvidenceCount(response.evidence.length)}
+              </dd>
+            </div>
+            {latencyMs !== null && (
+              <div className="meta-item meta-item--time">
+                <dt className="meta-item__label">Response time</dt>
+                <dd className="meta-item__value">
+                  <span className="meta-item__time" aria-hidden="true">
+                    <svg viewBox="0 0 16 16" width="14" height="14" fill="none">
+                      <circle cx="8" cy="8" r="6.25" stroke="currentColor" strokeWidth="1.5" />
+                      <path d="M8 5.25V8.2l2.1 1.35" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
+                    </svg>
+                  </span>
+                  {formatLatency(latencyMs)}
+                </dd>
+              </div>
+            )}
+          </dl>
 
           {response.refusal_reason && (
             <p className="error-banner">{response.refusal_reason}</p>

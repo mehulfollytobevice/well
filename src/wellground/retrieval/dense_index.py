@@ -153,6 +153,23 @@ class DenseIndex:
             )
         return hits
 
+    def cosine_scores(self, query: str, chunk_ids: list[str]) -> dict[str, float]:
+        """Return cosine similarity of `query` to each stored chunk embedding."""
+        unique_ids = list(dict.fromkeys(chunk_ids))
+        if not unique_ids or self.chunk_count == 0:
+            return {}
+
+        query_vec = self._encode_query(query)
+        got = self._collection.get(ids=unique_ids, include=["embeddings"])
+        embeddings = got.get("embeddings")
+        if embeddings is None:
+            return {}
+
+        scores: dict[str, float] = {}
+        for chunk_id, embedding in zip(got["ids"], embeddings, strict=True):
+            scores[chunk_id] = float(sum(a * b for a, b in zip(query_vec, embedding)))
+        return scores
+
     @classmethod
     def load(
         cls,
